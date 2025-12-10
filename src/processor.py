@@ -33,6 +33,21 @@ def calc_aqi(parameter: str, concentration: int) -> None:
     else:
         return {'level': 6, 'category': 'Extremely Poor', 'color': '#730023'}
 
+def map_aqi_level(levels) -> str:
+    """ Maps a aqi level to verbose output """
+
+    max_level = levels.max()
+
+    level_map = {
+        1: 'Good',
+        2: 'Fair',
+        3: 'Moderate',
+        4: 'Poor',
+        5: 'Very Poor'
+    }
+    
+    return level_map.get(max_level, 'Extremely Poor')
+
 if __name__ == '__main__':
     # Change work dir to top project level
     try:
@@ -40,6 +55,15 @@ if __name__ == '__main__':
     except NameError:
         script_path = Path.cwd()
 
-    data = pd.read_csv("data/merged_data.csv")
-    data[['level', 'category', 'color']] = data.apply(lambda row: calc_aqi(row['parameter'], row['value']), axis=1, result_type='expand')
-    data.to_csv("data/aq_data.csv")
+    df = pd.read_csv("data/merged_data.csv")
+
+    df[['level', 'category', 'color']] = df.apply(lambda row: calc_aqi(row['parameter'], row['value']), axis=1, result_type='expand')
+
+    grouped_df = df.groupby(['location_id', 'datetime'])
+    max_level_per_group = grouped_df['level'].agg(map_aqi_level).rename('poorest_aqi')
+    df = df.merge(max_level_per_group, 
+                  on=['location_id', 'datetime'], 
+                  how='left')
+
+    print(df.head(10))
+    df.to_csv("data/aq_data.csv")
