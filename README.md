@@ -35,7 +35,7 @@ Follow these steps to set up the local development environment.
 
 ```bash
 git clone https://github.com/nilsrechberger/AirStream.git
-cd mscids-csc-project
+cd AirStream
 ```
 
 ### 2\. Set up Python Environment
