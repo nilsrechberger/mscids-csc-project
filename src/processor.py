@@ -64,6 +64,11 @@ if __name__ == '__main__':
     df = df.merge(max_level_per_group, 
                   on=['location_id', 'datetime'], 
                   how='left')
+    
+    # Fill NAs in cos level, category and color
+    df['level'].fillna(value=-1, inplace=True)
+    df['category'].fillna(value="No Entry", inplace=True)
+    df['color'].fillna(value='#808080', inplace=True)
 
     print(df.head(10))
     df.to_csv("data/aq_data.csv")
