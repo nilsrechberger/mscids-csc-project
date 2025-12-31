@@ -13,7 +13,7 @@ def calc_aqi(parameter: str, concentration: int) -> None:
         'so2':  [100, 200, 350, 500, 750]
     }
 
-    # No AQI defintion for parameter no or co
+    # No AQI definition for parameter no or co
     if parameter == 'no' or parameter == 'co':
         return {'level': np.nan, 'category': np.nan, 'color': np.nan}
     else:
@@ -65,7 +65,8 @@ if __name__ == '__main__':
                   on=['location_id', 'datetime'], 
                   how='left')
     
-    # Fill NAs in cos level, category and color
+    # Fill NAs in cols level, category and color
+    df['value'].fillna(value=-0.1,inplace=True)
     df['level'].fillna(value=-1, inplace=True)
     df['category'].fillna(value="No Entry", inplace=True)
     df['color'].fillna(value='#808080', inplace=True)
