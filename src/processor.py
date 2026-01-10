@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from datetime import datetime
 
 def calc_aqi(parameter: str, concentration: int) -> None:
     """ Calculates the air quality index """
@@ -56,7 +55,7 @@ if __name__ == '__main__':
     except NameError:
         script_path = Path.cwd()
 
-    df = pd.read_csv(filepath_or_buffer="data/merged_data.csv")
+    df = pd.read_csv("data/merged_data.csv")
 
     df[['level', 'category', 'color']] = df.apply(lambda row: calc_aqi(row['parameter'], row['value']), axis=1, result_type='expand')
 
@@ -66,30 +65,11 @@ if __name__ == '__main__':
                   on=['location_id', 'datetime'], 
                   how='left')
     
-    df['datetime'] = pd.to_datetime(df['datetime'], utc=True)
-
-    start_date = pd.to_datetime("2024-01-01 01:00:00+01:00", utc=True)
-    end_date = pd.to_datetime("2024-12-31 23:00:00+01:00", utc=True)
-    all_dates = pd.date_range(start=start_date, end=end_date, freq='h')
-
-    static_columns = [col for col in df.columns if col not in ['datetime', 'value']]
-    unique_entities = df[static_columns].drop_duplicates()
-
-    grid_list = []
-    for _, meta in unique_entities.iterrows():
-        temp_df = pd.DataFrame([meta.to_dict()] * len(all_dates))
-        temp_df['datetime'] = all_dates
-        grid_list.append(temp_df)
-
-    grid_df = pd.concat(grid_list, ignore_index=True)
-
-    df = pd.merge(grid_df, df, on=static_columns + ['datetime'], how='left')
-        
     # Fill NAs in cols level, category and color
     df['value'].fillna(value=-0.1,inplace=True)
     df['level'].fillna(value=-1, inplace=True)
     df['category'].fillna(value="No Entry", inplace=True)
     df['color'].fillna(value='#808080', inplace=True)
 
-    # print(df['datetime'].unique())
+    print(df.head(10))
     df.to_csv("data/aq_data.csv")
